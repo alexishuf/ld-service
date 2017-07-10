@@ -1,0 +1,36 @@
+@prefix a: <http://a.example.org/ns#>.
+@prefix b: <http://b.example.org/ns#>.
+@prefix foaf: <http://xmlns.com/foaf/0.1/>.
+@prefix owl: <http://www.w3.org/2002/07/owl#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+
+####################
+## A
+####################
+
+a:John a foaf:Person;
+    foaf:account [
+        foaf:accountName "johnny1986";
+        foaf:accountServiceHomePage <http://a.example.org/>
+    ].
+a:Mary a foaf:Person;
+    foaf:account [
+        foaf:accountName "bloodymary";
+        foaf:accountServiceHomePage <http://a.example.org/>
+    ].
+a:Jack a foaf:Person;
+    foaf:account [
+        foaf:accountName "jackdaniels";
+        foaf:accountServiceHomePage <http://a.example.org/>
+    ].
+
+####################
+## B
+####################
+
+b:Bob a foaf:Person;
+    foaf:name "Robert";
+    foaf:account [
+        foaf:accountName "bobby";
+        foaf:accountServiceHomePage <http://b.example.org/>
+    ].
