@@ -1,5 +1,6 @@
 package br.ufsc.inf.lapesd.ldservice.model;
 
+import br.ufsc.inf.lapesd.ldservice.model.impl.SequenceTransformer;
 import org.apache.jena.rdf.model.Model;
 
 import javax.annotation.Nonnull;
@@ -18,4 +19,8 @@ public interface RenderTransformer {
      * @return The result of transformation
      */
     @Nonnull Model transform(@Nonnull Model model, boolean isSingleResource);
+
+    default @Nonnull RenderTransformer andThen(@Nonnull RenderTransformer next) {
+        return new SequenceTransformer(this, next);
+    }
 }
