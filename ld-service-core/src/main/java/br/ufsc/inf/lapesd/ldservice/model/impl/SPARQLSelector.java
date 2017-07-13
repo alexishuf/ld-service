@@ -2,6 +2,8 @@ package br.ufsc.inf.lapesd.ldservice.model.impl;
 
 import br.ufsc.inf.lapesd.ldservice.model.Activation;
 import br.ufsc.inf.lapesd.ldservice.model.Selector;
+import org.apache.http.client.HttpClient;
+import org.apache.http.protocol.HttpContext;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QuerySolution;
@@ -13,17 +15,26 @@ import org.apache.jena.rdf.model.Resource;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
+
+import static org.apache.jena.query.QueryExecutionFactory.sparqlService;
 
 public class SPARQLSelector implements Selector {
-    private final @Nonnull
-    Model model;
+    private final @Nonnull Function<String, QueryExecution> executionFactory;
     private final boolean singleResource;
-    private final @Nonnull
-    String template;
+    private final @Nonnull String template;
 
-    public SPARQLSelector(@Nonnull Model model, boolean singleResource,
-                          @Nonnull String template) {
-        this.model = model;
+    public static Builder fromModel(@Nonnull Model model) {
+        return new BuilderImpl(q -> QueryExecutionFactory.create(q, model));
+    }
+
+    public static ServiceBuilder fromService(String service) {
+        return new ServiceBuilder(service);
+    }
+
+    protected SPARQLSelector(@Nonnull Function<String, QueryExecution> executionFactory,
+                          boolean singleResource, @Nonnull String template) {
+        this.executionFactory = executionFactory;
         this.singleResource = singleResource;
         this.template = template;
     }
@@ -33,7 +44,7 @@ public class SPARQLSelector implements Selector {
     public List<Resource> selectResource(Activation activation) {
         String q = ActivationHelper.replace(template, activation);
         List<Resource> list = new ArrayList<>();
-        try (QueryExecution execution = QueryExecutionFactory.create(q, model)) {
+        try (QueryExecution execution = executionFactory.apply(q)) {
             ResultSet resultSet = execution.execSelect();
             String main = resultSet.getResultVars().iterator().next();
             while (resultSet.hasNext()) {
@@ -52,5 +63,51 @@ public class SPARQLSelector implements Selector {
     @Override
     public boolean isSingleResource() {
         return singleResource;
+    }
+
+    public interface Builder {
+        default SPARQLSelector selectSingle(@Nonnull String template) {
+            return select(true, template);
+        }
+        default SPARQLSelector selectList(@Nonnull String template) {
+            return select(false, template);
+        }
+        SPARQLSelector select(boolean singleResource, @Nonnull String template);
+    }
+
+    public static class BuilderImpl implements Builder {
+        private final @Nonnull Function<String, QueryExecution> executionFactory;
+        BuilderImpl(@Nonnull Function<String, QueryExecution> executionFactory) {
+            this.executionFactory = executionFactory;
+        }
+
+        public SPARQLSelector select(boolean singleResource, @Nonnull String template) {
+            return new SPARQLSelector(executionFactory, singleResource, template);
+        }
+    }
+
+    public static class ServiceBuilder implements Builder {
+        private HttpClient httpClient;
+        private HttpContext httpContext;
+        private final @Nonnull String service;
+
+        ServiceBuilder(@Nonnull String service) {
+            this.service = service;
+        }
+
+        @Nonnull public ServiceBuilder withHttpClient(HttpClient httpClient) {
+            this.httpClient = httpClient;
+            return this;
+        }
+        @Nonnull public ServiceBuilder withHttpContext(HttpContext httpContext) {
+            this.httpContext = httpContext;
+            return this;
+        }
+
+        @Override
+        public SPARQLSelector select(boolean singleResource, @Nonnull String template) {
+            return new SPARQLSelector(q -> sparqlService(service, q, httpClient, httpContext),
+                    singleResource, template);
+        }
     }
 }

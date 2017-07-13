@@ -15,12 +15,9 @@ import org.apache.jena.reasoner.Reasoner;
 import org.apache.jena.reasoner.ReasonerRegistry;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.sparql.vocabulary.FOAF;
 import org.apache.jena.vocabulary.OWL2;
 import org.apache.jena.vocabulary.RDF;
-import org.apache.jena.vocabulary.RDFS;
-import org.apache.jena.vocabulary.XSD;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTestNg;
@@ -43,23 +40,15 @@ import static org.apache.jena.rdf.model.ResourceFactory.createPlainLiteral;
 import static org.apache.jena.rdf.model.ResourceFactory.createResource;
 
 public class LDEndpointTest extends JerseyTestNg.ContainerPerMethodTest {
-    private static String A_NS = "http://a.example.org/ns#";
-    private static String B_NS = "http://b.example.org/ns#";
-    private static String S_NS = "http://s.example.org/ns#";
-    private static String PREFIXES = "PREFIX foaf: <" + FOAF.getURI() + ">\n" +
-            "PREFIX rdf: <" + RDF.getURI() + ">\n" +
-            "PREFIX sh: <" + schemaP("") + ">\n";
 
     @Override
     protected Application configure() {
         /* instance data */
-        Model model = ModelFactory.createDefaultModel();
-        InputStream in = getClass().getClassLoader().getResourceAsStream("data-1.ttl");
-        RDFDataMgr.read(model, in, Lang.TURTLE);
+        Model model = Data1.load();
 
         /* reasoner for schema */
         Model schema = ModelFactory.createDefaultModel();
-        in = getClass().getClassLoader().getResourceAsStream("schema-1.ttl");
+        InputStream in = getClass().getClassLoader().getResourceAsStream("schema-1.ttl");
         RDFDataMgr.read(schema, in, Lang.TURTLE);
         Reasoner reasoner = ReasonerRegistry.getOWLReasoner().bindSchema(schema);
 
@@ -69,31 +58,31 @@ public class LDEndpointTest extends JerseyTestNg.ContainerPerMethodTest {
                 .addRewrite(new UriRewrite(new RxActivator("http://a.example.org/ns#(.*)"), "/a/${1}"))
                 .addRewrite(new UriRewrite(new RxActivator("http://b.example.org/ns#(.*)"), "/b/${1}"))
                 .addSelector(new PathTemplateActivator("by_id/a/{id}"),
-                        new SPARQLSelector(model, true,
-                        PREFIXES +
+                        SPARQLSelector.fromModel(model).selectSingle(
+                        TestUtils.PREFIXES +
                                 "SELECT ?p WHERE {\n" +
                                 "  ?p foaf:account ?a.\n" +
                                 "  ?a foaf:accountName \"${id}\"." +
                                 "  ?a foaf:accountServiceHomePage <http://a.example.org/>." +
                                 "}"))
                 .addSelector(new PathTemplateActivator("by_id/b/{id}"),
-                        new SPARQLSelector(model, true,
-                        PREFIXES +
+                        SPARQLSelector.fromModel(model).selectSingle(
+                        TestUtils.PREFIXES +
                                 "SELECT ?p WHERE {\n" +
                                 "  ?p foaf:account ?a.\n" +
                                 "  ?a foaf:accountName \"${id}\"." +
                                 "  ?a foaf:accountServiceHomePage <http://b.example.org/>." +
                                 "}"))
                 .addSelector(new PathTemplateActivator("list/a"),
-                        new SPARQLSelector(model, false,
-                        PREFIXES +
+                        SPARQLSelector.fromModel(model).selectList(
+                        TestUtils.PREFIXES +
                                 "SELECT ?p WHERE {\n" +
                                 "  ?p foaf:account ?x.\n" +
                                 "  ?x foaf:accountServiceHomePage <http://a.example.org/>.\n" +
                                 "}"))
                 .addSelector(new PathTemplateActivator("list/b"),
-                        new SPARQLSelector(model, false,
-                        PREFIXES +
+                        SPARQLSelector.fromModel(model).selectList(
+                        TestUtils.PREFIXES +
                                 "SELECT ?p WHERE {\n" +
                                 "  ?p foaf:account ?x.\n" +
                                 "  ?x foaf:accountServiceHomePage <http://b.example.org/>.\n" +
@@ -150,7 +139,7 @@ public class LDEndpointTest extends JerseyTestNg.ContainerPerMethodTest {
 
         Assert.assertTrue(objs.stream().anyMatch(n -> n.asResource().getURI().endsWith("/a/John")));
         Assert.assertTrue(objs.stream()
-                .anyMatch(n -> n.asResource().getURI().endsWith(A_NS + "John")));
+                .anyMatch(n -> n.asResource().getURI().endsWith(Data1.A_NS + "John")));
     }
 
     @Test
@@ -172,7 +161,7 @@ public class LDEndpointTest extends JerseyTestNg.ContainerPerMethodTest {
         /* default CBD is unbounded */
         Model m;
         m = target("/by_id/a/johnny1986").request("text/turtle").get(Model.class);
-        try (QueryExecution ex = QueryExecutionFactory.create(PREFIXES + "ASK {" +
+        try (QueryExecution ex = QueryExecutionFactory.create(TestUtils.PREFIXES + "ASK {" +
                 "  ?x a foaf:Person.\n" +
                 "  ?x foaf:account ?a.\n" +
                 "  ?a foaf:accountName ?name.\n" +
@@ -183,10 +172,10 @@ public class LDEndpointTest extends JerseyTestNg.ContainerPerMethodTest {
         /* for by_id/b/ CBDTraverser has maxPath = 0 */
         m = target("/by_id/b/bobby").request("text/turtle").get(Model.class);
         try (QueryExecution ex = QueryExecutionFactory.create(
-                PREFIXES + "ASK {?x a foaf:Person.}", m)) {
+                TestUtils.PREFIXES + "ASK {?x a foaf:Person.}", m)) {
             Assert.assertTrue(ex.execAsk());
         }
-        try (QueryExecution ex = QueryExecutionFactory.create(PREFIXES + "ASK {" +
+        try (QueryExecution ex = QueryExecutionFactory.create(TestUtils.PREFIXES + "ASK {" +
                 "  ?x a foaf:Person.\n" +
                 "  ?x foaf:account ?a.\n" +
                 "  ?a foaf:accountName ?name.\n" +
@@ -230,7 +219,7 @@ public class LDEndpointTest extends JerseyTestNg.ContainerPerMethodTest {
     @Test
     public void testListWithCBD() {
         Model m = target("/list/b").request("text/turtle").get(Model.class);
-        try (QueryExecution ex = QueryExecutionFactory.create(PREFIXES + "ASK {\n" +
+        try (QueryExecution ex = QueryExecutionFactory.create(TestUtils.PREFIXES + "ASK {\n" +
                 "  ?p sh:mainEntity ?e.\n" +
                 "  ?e rdf:first ?bob.\n" +
                 "  ?bob foaf:name \"Robert\".\n" +
@@ -246,9 +235,9 @@ public class LDEndpointTest extends JerseyTestNg.ContainerPerMethodTest {
         Resource bobby = m.listObjectsOfProperty(schemaP("mainEntity")).next().asResource();
         Assert.assertTrue(bobby.hasProperty(RDF.type, FOAF.Person));
         Assert.assertTrue(bobby.hasProperty(RDF.type,
-                ResourceFactory.createResource(S_NS + "Super")));
+                ResourceFactory.createResource(Data1.S_NS + "Super")));
         Assert.assertTrue(bobby.hasProperty(RDF.type,
-                ResourceFactory.createResource(S_NS + "NamedPerson")));
+                ResourceFactory.createResource(Data1.S_NS + "NamedPerson")));
     }
 
     @Test
@@ -258,7 +247,7 @@ public class LDEndpointTest extends JerseyTestNg.ContainerPerMethodTest {
         Resource bobby = m.listObjectsOfProperty(schemaP("mainEntity")).next().asResource();
         Assert.assertTrue(bobby.hasProperty(RDF.type, FOAF.Person));
         Assert.assertFalse(bobby.hasProperty(RDF.type,
-                ResourceFactory.createResource(B_NS + "NamedPerson")));
+                ResourceFactory.createResource(Data1.B_NS + "NamedPerson")));
     }
 
     @Test
@@ -283,7 +272,7 @@ public class LDEndpointTest extends JerseyTestNg.ContainerPerMethodTest {
         Resource bob = persons.get(0);
         Assert.assertTrue(bob.hasProperty(RDF.type, FOAF.Person));
         Assert.assertTrue(bob.hasProperty(FOAF.name, createPlainLiteral("Robert")));
-        Assert.assertTrue(bob.hasProperty(RDF.type, createResource(S_NS + "Super")));
-        Assert.assertTrue(bob.hasProperty(RDF.type, createResource(S_NS + "NamedPerson")));
+        Assert.assertTrue(bob.hasProperty(RDF.type, createResource(Data1.S_NS + "Super")));
+        Assert.assertTrue(bob.hasProperty(RDF.type, createResource(Data1.S_NS + "NamedPerson")));
     }
 }
