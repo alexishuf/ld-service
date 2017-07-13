@@ -4,7 +4,7 @@
 
     <groupId>br.ufsc.inf.lapesd.ldservice</groupId>
     <artifactId>ld-service-parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>${ldservice.version}</version>
     <packaging>pom</packaging>
 
     <url>http://github.com/alexishuf/ld-service</url>
@@ -20,6 +20,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <ldservice.version>1.0-SNAPSHOT</ldservice.version>
         <jsr305.version>3.0.1</jsr305.version>
         <slf4j.version>1.7.21</slf4j.version>
         <jaxrs.version>2.0.1</jaxrs.version>
