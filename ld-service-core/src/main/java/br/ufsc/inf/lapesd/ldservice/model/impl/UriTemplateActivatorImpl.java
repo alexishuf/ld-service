@@ -7,6 +7,7 @@ import org.glassfish.jersey.uri.UriTemplate;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
  * Implements an activator using {@link UriTemplate}
@@ -24,6 +25,12 @@ class UriTemplateActivatorImpl implements Activator<String> {
     public Activation<String> tryActivate(@Nonnull String text) {
         LinkedHashMap<String, String> map = new LinkedHashMap<>();
         return uriTemplate.match(text, map) ? new MapActivation<>(this, map) : null;
+    }
+
+    @Nonnull
+    @Override
+    public List<String> getVarNames() {
+        return uriTemplate.getTemplateVariables();
     }
 
     @Override

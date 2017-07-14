@@ -28,6 +28,11 @@ public class MapActivation<T> implements Activation<T> {
         return names;
     }
 
+    @Override
+    public boolean contains(String varName) {
+        return map.keySet().contains(varName);
+    }
+
     @Nonnull
     @Override
     public T get(String varName) {
@@ -36,5 +41,10 @@ public class MapActivation<T> implements Activation<T> {
                     varName, activator));
         }
         return map.get(varName);
+    }
+
+    @Override
+    public T getOrDefault(String varName, T defaultValue) {
+        return map.getOrDefault(varName, defaultValue);
     }
 }
