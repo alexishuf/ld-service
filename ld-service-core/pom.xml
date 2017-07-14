@@ -9,7 +9,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>ld-service-core</artifactId>
-  <version>${ldservice.version</version>
+  <version>${ldservice.version}</version>
   <packaging>jar</packaging>
 
   <name>ld-service-core</name>
