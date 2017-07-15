@@ -75,5 +75,6 @@
 
     <modules>
         <module>ld-service-core</module>
+        <module>ld-service-linkedator</module>
     </modules>
 </project>

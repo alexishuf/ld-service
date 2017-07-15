@@ -1,0 +1,15 @@
+{
+  "semanticResources": [
+    {
+      "entity": "http://example.org/ns#Car",
+      "uriTemplates": [
+        {
+          "uri": "/car/{plate}",
+          "parameters": {
+            "plate": "http://example.org/ns#plate"
+          }
+        }
+      ]
+    }
+  ]
+}

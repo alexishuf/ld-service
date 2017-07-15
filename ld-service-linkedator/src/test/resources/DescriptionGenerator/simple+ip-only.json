@@ -1,0 +1,17 @@
+{
+  "ipAddress": "10.0.0.1",
+  "uriBase": "/service",
+  "semanticResources": [
+    {
+      "entity": "http://example.org/ns#Worker",
+      "uriTemplates": [
+        {
+          "uri": "/{id}",
+          "parameters": {
+            "id": "http://example.org/ns#id"
+          }
+        }
+      ]
+    }
+  ]
+}

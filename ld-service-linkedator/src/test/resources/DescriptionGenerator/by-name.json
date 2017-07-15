@@ -1,0 +1,15 @@
+{
+  "semanticResources": [
+    {
+      "entity": "http://example.org/ns#Worker",
+      "uriTemplates": [
+        {
+          "uri": "/by_name/{name}",
+          "parameters": {
+            "name": "http://example.org/ns#name"
+          }
+        }
+      ]
+    }
+  ]
+}

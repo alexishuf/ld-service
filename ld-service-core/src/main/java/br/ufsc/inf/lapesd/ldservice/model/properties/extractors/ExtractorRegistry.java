@@ -14,6 +14,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @SuppressWarnings("WeakerAccess")
 public class ExtractorRegistry {
@@ -73,6 +74,22 @@ public class ExtractorRegistry {
         SelectorPropertyExtractor extractor = find(propertyClass, selector.getClass());
         //noinspection unchecked
         return extractor == null ? null : extractor.extract(selector);
+    }
+
+    @Nullable
+    public <P extends SelectorProperty, T extends Selector>
+    Set<P> extractAndMerge(@Nonnull Class<P> propertyClass, @Nonnull T selector) {
+        SelectorPropertyExtractor extractor = find(propertyClass, selector.getClass());
+        Set<P> set = Collections.emptySet();
+        if (extractor != null) {
+            //noinspection unchecked
+            set = (Set<P>) extractor.extract(selector);
+        }
+        Set<P> explicit = selector.getProperties(propertyClass);
+
+        Map<Object, P> map = new HashMap<>();
+        Stream.concat(set.stream(), explicit.stream()).forEach(p -> map.put(p.getKey(), p));
+        return new HashSet<>(map.values());
     }
 
     static {

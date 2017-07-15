@@ -1,0 +1,16 @@
+{
+  "semanticResources": [
+    {
+      "entity": "http://xmlns.com/foaf/0.1/Person",
+      "uriTemplates": [
+        {
+          "method": "GET",
+          "uri": "/{id}",
+          "parameters": {
+            "id": "http://xmlns.com/foaf/0.1/accountName"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "ipAddress": "192.168.0.1",
+  "serverPort": "8080",
+  "uriBase": "/service",
+  "semanticResources": [
+    {
+      "entity": "http://example.org/ns#Worker",
+      "uriTemplates": [
+        {
+          "uri": "/{id}",
+          "parameters": {
+            "id": "http://example.org/ns#id"
+          }
+        }
+      ]
+    },
+    {
+      "entity": "http://example.org/ns#Car",
+      "uriTemplates": [
+        {
+          "uri": "/car/{plate}",
+          "parameters": {
+            "plate": "http://example.org/ns#plate"
+          }
+        }
+      ]
+    }
+  ]
+}

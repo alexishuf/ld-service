@@ -1,0 +1,16 @@
+{
+  "semanticResources": [
+    {
+      "entity": "http://example.org/ns#Worker",
+      "uriTemplates": [
+        {
+          "method": "GET",
+          "uri": "/{id}",
+          "parameters": {
+            "id": "http://example.org/ns#id"
+          }
+        }
+      ]
+    }
+  ]
+}

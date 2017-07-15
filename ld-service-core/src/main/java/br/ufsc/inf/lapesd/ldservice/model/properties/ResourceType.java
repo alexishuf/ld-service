@@ -13,9 +13,14 @@ public class ResourceType implements SelectorProperty {
     private final boolean certain;
     private final @Nonnull String uri;
 
-    public ResourceType(boolean certain, String uri) {
+    public ResourceType(boolean certain, @Nonnull String uri) {
         this.certain = certain;
         this.uri = uri;
+    }
+
+    @Override
+    public Object getKey() {
+        return this;
     }
 
     /**

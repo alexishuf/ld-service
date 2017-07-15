@@ -15,6 +15,6 @@ public class PathTemplateActivator extends UriTemplateActivatorImpl implements P
 
     @Nonnull
     public String getPathTemplate() {
-        return uriTemplate.toString();
+        return uriTemplate.getTemplate();
     }
 }
