@@ -26,6 +26,7 @@ import static br.ufsc.inf.lapesd.ldservice.priv.Utils.schemaP;
 @Path("/")
 public class LDEndpoint {
     private static Logger logger = LoggerFactory.getLogger(LDEndpoint.class);
+    private List<Mapping> mappings = new ArrayList<>();
     private List<UriRewrite> fromPrivate = new ArrayList<>();
     private LinkedHashMap<Activator, Selector> selectors = new LinkedHashMap<>();
     private LinkedHashMap<Activator, Traverser> traversers = new LinkedHashMap<>();
@@ -37,9 +38,12 @@ public class LDEndpoint {
         mapping.getSelectors().forEach(e -> selectors.put(e.getKey(), e.getValue()));
         mapping.getTraversers().forEach(e -> traversers.put(e.getKey(), e.getValue()));
         mapping.getTransformers().forEach(e -> transformers.put(e.getKey(), e.getValue()));
+        mappings.add(mapping);
     }
 
-
+    public List<Mapping> getMappings() {
+        return Collections.unmodifiableList(mappings);
+    }
 
     @GET
     @Path("/{subPath:.*}")

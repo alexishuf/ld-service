@@ -2,6 +2,7 @@ package br.ufsc.inf.lapesd.ldservice.model.impl;
 
 import br.ufsc.inf.lapesd.ldservice.model.Activation;
 import br.ufsc.inf.lapesd.ldservice.model.Selector;
+import br.ufsc.inf.lapesd.ldservice.model.properties.SelectorProperty;
 import org.apache.http.client.HttpClient;
 import org.apache.http.protocol.HttpContext;
 import org.apache.jena.query.QueryExecution;
@@ -15,6 +16,7 @@ import org.apache.jena.rdf.model.Resource;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 
 import static org.apache.jena.query.QueryExecutionFactory.sparqlService;
@@ -23,6 +25,7 @@ public class SPARQLSelector implements Selector {
     private final @Nonnull Function<String, QueryExecution> executionFactory;
     private final boolean singleResource;
     private final @Nonnull String template;
+    private SelectorPropertyList properties = new SelectorPropertyList();
 
     public static Builder fromModel(@Nonnull Model model) {
         return new BuilderImpl(q -> QueryExecutionFactory.create(q, model));
@@ -60,9 +63,33 @@ public class SPARQLSelector implements Selector {
         return list;
     }
 
+    @Nonnull
+    public String getSPARQLTemplate() {
+        return template;
+    }
+
     @Override
     public boolean isSingleResource() {
         return singleResource;
+    }
+
+    @Nonnull
+    @Override
+    public <T extends SelectorProperty> Set<T> getProperties(Class<T> propertyClass) {
+        return properties.getProperties(propertyClass);
+    }
+
+    @Nonnull
+    @Override
+    public <T extends SelectorProperty> Selector addProperty(T property) {
+        properties.add(property);
+        return this;
+    }
+
+    @Override
+    public <T extends SelectorProperty> Selector removeProperty(T property) {
+        properties.remove(property);
+        return this;
     }
 
     public interface Builder {

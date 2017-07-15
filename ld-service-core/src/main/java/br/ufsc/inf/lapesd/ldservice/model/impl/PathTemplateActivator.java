@@ -12,4 +12,9 @@ public class PathTemplateActivator extends UriTemplateActivatorImpl implements P
     public PathTemplateActivator(@Nonnull String pathTemplate) {
         super(new PathTemplate(pathTemplate));
     }
+
+    @Nonnull
+    public String getPathTemplate() {
+        return uriTemplate.toString();
+    }
 }

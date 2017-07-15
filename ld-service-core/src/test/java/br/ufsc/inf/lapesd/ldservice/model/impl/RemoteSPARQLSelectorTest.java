@@ -5,6 +5,8 @@ import br.ufsc.inf.lapesd.ldservice.model.Activation;
 import org.apache.jena.fuseki.embedded.FusekiEmbeddedServer;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
 import org.testng.Assert;

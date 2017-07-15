@@ -9,14 +9,14 @@ import java.util.*;
  * A collection of {@link Selector} and {@link UriRewrite} instances.
  */
 public class Mapping {
-    private final @Nonnull LinkedHashMap<Activator, Selector> selectors;
-    private final @Nonnull LinkedHashMap<Activator, Traverser> traversers;
-    private final @Nonnull LinkedHashMap<Activator, RenderTransformer> transformers;
+    private final @Nonnull LinkedHashMap<Activator<?>, Selector> selectors;
+    private final @Nonnull LinkedHashMap<Activator<?>, Traverser> traversers;
+    private final @Nonnull LinkedHashMap<Activator<?>, RenderTransformer> transformers;
     private final @Nonnull List<UriRewrite> rewrites;
 
-    public Mapping(@Nonnull LinkedHashMap<Activator, Selector> selectors,
-                   @Nonnull LinkedHashMap<Activator, Traverser> traversers,
-                   @Nonnull LinkedHashMap<Activator, RenderTransformer> transformers,
+    public Mapping(@Nonnull LinkedHashMap<Activator<?>, Selector> selectors,
+                   @Nonnull LinkedHashMap<Activator<?>, Traverser> traversers,
+                   @Nonnull LinkedHashMap<Activator<?>, RenderTransformer> transformers,
                    @Nonnull List<UriRewrite> rewrites) {
         this.selectors = selectors;
         this.traversers = traversers;
@@ -24,13 +24,13 @@ public class Mapping {
         this.rewrites = rewrites;
     }
 
-    public @Nonnull Collection<Map.Entry<Activator, Selector>> getSelectors() {
+    public @Nonnull Collection<Map.Entry<Activator<?>, Selector>> getSelectors() {
         return selectors.entrySet();
     }
-    public @Nonnull Collection<Map.Entry<Activator, Traverser>> getTraversers() {
+    public @Nonnull Collection<Map.Entry<Activator<?>, Traverser>> getTraversers() {
         return traversers.entrySet();
     }
-    public @Nonnull Collection<Map.Entry<Activator, RenderTransformer>> getTransformers() {
+    public @Nonnull Collection<Map.Entry<Activator<?>, RenderTransformer>> getTransformers() {
         return transformers.entrySet();
     }
 
@@ -39,22 +39,22 @@ public class Mapping {
     }
 
     public static class Builder {
-        private LinkedHashMap<Activator, Selector> selectors = new LinkedHashMap<>();
-        private LinkedHashMap<Activator, Traverser> traversers = new LinkedHashMap<>();
-        private LinkedHashMap<Activator, RenderTransformer> transformers = new LinkedHashMap<>();
+        private LinkedHashMap<Activator<?>, Selector> selectors = new LinkedHashMap<>();
+        private LinkedHashMap<Activator<?>, Traverser> traversers = new LinkedHashMap<>();
+        private LinkedHashMap<Activator<?>, RenderTransformer> transformers = new LinkedHashMap<>();
         private List<UriRewrite> rewrites = new ArrayList<>();
 
-        public @Nonnull Builder addSelector(@Nonnull Activator activator,
+        public @Nonnull Builder addSelector(@Nonnull Activator<?> activator,
                                             @Nonnull Selector selector) {
             selectors.put(activator, selector);
             return this;
         }
-        public @Nonnull Builder addTraverser(@Nonnull Activator activator,
+        public @Nonnull Builder addTraverser(@Nonnull Activator<?> activator,
                                              @Nonnull Traverser traverser) {
             traversers.put(activator, traverser);
             return this;
         }
-        public @Nonnull Builder addTransformer(@Nonnull Activator activator,
+        public @Nonnull Builder addTransformer(@Nonnull Activator<?> activator,
                                              @Nonnull RenderTransformer transformer) {
             transformers.put(activator, transformer);
             return this;
