@@ -5,6 +5,7 @@ import br.ufsc.inf.lapesd.ldservice.linkedator.properties.LinkedatorPathVariable
 import br.ufsc.inf.lapesd.ldservice.model.Activation;
 import br.ufsc.inf.lapesd.ldservice.model.Mapping;
 import br.ufsc.inf.lapesd.ldservice.model.Selector;
+import br.ufsc.inf.lapesd.ldservice.model.impl.AbstractSelector;
 import br.ufsc.inf.lapesd.ldservice.model.impl.PathTemplateActivator;
 import br.ufsc.inf.lapesd.ldservice.model.impl.SPARQLSelector;
 import br.ufsc.inf.lapesd.ldservice.model.impl.SelectorPropertyList;
@@ -77,9 +78,7 @@ public class DescriptionGeneratorTest {
         return IOUtils.toString(cl.getResourceAsStream(path), "UTF-8");
     }
 
-    private static class DummySelector implements Selector {
-        SelectorPropertyList properties = new SelectorPropertyList();
-
+    private static class DummySelector  extends AbstractSelector implements Selector {
         @Nonnull
         @Override
         public List<Resource> selectResource(Activation activation) {
@@ -88,22 +87,6 @@ public class DescriptionGeneratorTest {
         @Override
         public boolean isSingleResource() {
             return true;
-        }
-        @Nonnull
-        @Override
-        public <T extends SelectorProperty> Set<T> getProperties(Class<T> propertyClass) {
-            return properties.getProperties(propertyClass);
-        }
-        @Nonnull
-        @Override
-        public <T extends SelectorProperty> Selector addProperty(T property) {
-            properties.add(property);
-            return this;
-        }
-        @Override
-        public <T extends SelectorProperty> Selector removeProperty(T property) {
-            properties.remove(property);
-            return this;
         }
     }
 

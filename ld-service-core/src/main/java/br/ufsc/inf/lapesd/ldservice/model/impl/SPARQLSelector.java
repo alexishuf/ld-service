@@ -21,11 +21,10 @@ import java.util.function.Function;
 
 import static org.apache.jena.query.QueryExecutionFactory.sparqlService;
 
-public class SPARQLSelector implements Selector {
+public class SPARQLSelector extends AbstractSelector implements Selector  {
     private final @Nonnull Function<String, QueryExecution> executionFactory;
     private final boolean singleResource;
     private final @Nonnull String template;
-    private SelectorPropertyList properties = new SelectorPropertyList();
 
     public static Builder fromModel(@Nonnull Model model) {
         return new BuilderImpl(q -> QueryExecutionFactory.create(q, model));
@@ -71,25 +70,6 @@ public class SPARQLSelector implements Selector {
     @Override
     public boolean isSingleResource() {
         return singleResource;
-    }
-
-    @Nonnull
-    @Override
-    public <T extends SelectorProperty> Set<T> getProperties(Class<T> propertyClass) {
-        return properties.getProperties(propertyClass);
-    }
-
-    @Nonnull
-    @Override
-    public <T extends SelectorProperty> Selector addProperty(T property) {
-        properties.add(property);
-        return this;
-    }
-
-    @Override
-    public <T extends SelectorProperty> Selector removeProperty(T property) {
-        properties.remove(property);
-        return this;
     }
 
     public interface Builder {

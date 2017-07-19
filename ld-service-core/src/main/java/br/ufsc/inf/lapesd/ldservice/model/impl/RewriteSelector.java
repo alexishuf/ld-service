@@ -11,9 +11,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-public class RewriteSelector implements Selector{
+public class RewriteSelector extends AbstractSelector implements Selector{
     private final @Nonnull String template;
-    private SelectorPropertyList properties = new SelectorPropertyList();
 
     public RewriteSelector(@Nonnull String template) {
         this.template = template;
@@ -29,24 +28,5 @@ public class RewriteSelector implements Selector{
     @Override
     public boolean isSingleResource() {
         return true;
-    }
-
-    @Nonnull
-    @Override
-    public <T extends SelectorProperty> Set<T> getProperties(Class<T> propertyClass) {
-        return properties.getProperties(propertyClass);
-    }
-
-    @Nonnull
-    @Override
-    public <T extends SelectorProperty> Selector addProperty(T property) {
-        properties.add(property);
-        return this;
-    }
-
-    @Override
-    public <T extends SelectorProperty> Selector removeProperty(T property) {
-        properties.remove(property);
-        return this;
     }
 }
