@@ -43,7 +43,7 @@ public class SPARQLSelector extends AbstractSelector implements Selector  {
 
     @Nonnull
     @Override
-    public List<Resource> selectResource(Activation activation) {
+    public List<Resource> selectResource(Activation<?> activation) {
         String q = ActivationHelper.replace(template, activation);
         List<Resource> list = new ArrayList<>();
         try (QueryExecution execution = executionFactory.apply(q)) {

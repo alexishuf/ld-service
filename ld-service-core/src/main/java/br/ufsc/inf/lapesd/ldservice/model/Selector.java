@@ -19,7 +19,7 @@ public interface Selector {
      *         will be empty. If isSingleResource() == true, then the list may at most have
      *         a single element.
      */
-    @Nonnull List<Resource> selectResource(Activation activation);
+    @Nonnull List<Resource> selectResource(Activation<?> activation);
 
     /**
      * If true, selectResource() will either return an empty list or a singleton list.

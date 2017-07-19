@@ -81,7 +81,7 @@ public class DescriptionGeneratorTest {
     private static class DummySelector  extends AbstractSelector implements Selector {
         @Nonnull
         @Override
-        public List<Resource> selectResource(Activation activation) {
+        public List<Resource> selectResource(Activation<?> activation) {
             return Collections.emptyList();
         }
         @Override

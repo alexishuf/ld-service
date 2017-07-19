@@ -20,7 +20,7 @@ public class RewriteSelector extends AbstractSelector implements Selector{
 
     @Nonnull
     @Override
-    public List<Resource> selectResource(Activation activation) {
+    public List<Resource> selectResource(Activation<?> activation) {
         String uri = ActivationHelper.replace(template, activation);
         return Collections.singletonList(ResourceFactory.createResource(uri));
     }
