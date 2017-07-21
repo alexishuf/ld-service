@@ -9,14 +9,28 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>ld-service-core</artifactId>
-  <version>${ldservice.version}</version>
   <packaging>jar</packaging>
+  <version>1.0-SNAPSHOT</version>
 
   <name>ld-service-core</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>${jar-plugin.version}</version>
+        <executions>
+          <execution>
+            <goals><goal>test-jar</goal></goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 
   <dependencies>
     <dependency>

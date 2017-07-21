@@ -7,12 +7,12 @@
   <parent>
     <artifactId>ld-service-parent</artifactId>
     <groupId>br.ufsc.inf.lapesd.ldservice</groupId>
-    <version>${ldservice.version}</version>
+    <version>1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
   </parent>
-  <artifactId>ld-service-linkedator</artifactId>
   <name>ld-service-linkedator</name>
-  <version>${ldservice.version}</version>
-
+  <artifactId>ld-service-linkedator</artifactId>
+  <version>1.0-SNAPSHOT</version>
 
   <dependencies>
     <dependency>

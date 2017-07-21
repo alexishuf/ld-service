@@ -4,7 +4,7 @@
 
     <groupId>br.ufsc.inf.lapesd.ldservice</groupId>
     <artifactId>ld-service-parent</artifactId>
-    <version>${ldservice.version}</version>
+    <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <url>http://github.com/alexishuf/ld-service</url>
@@ -76,6 +76,6 @@
     <modules>
         <module>ld-service-core</module>
         <module>ld-service-linkedator</module>
-      <module>ld-service-tabular</module>
+        <module>ld-service-tabular</module>
     </modules>
 </project>
