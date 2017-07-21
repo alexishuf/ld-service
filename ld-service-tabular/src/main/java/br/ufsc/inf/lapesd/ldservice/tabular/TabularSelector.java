@@ -58,14 +58,14 @@ public class TabularSelector extends AbstractSelector {
             return this;
         }
 
-        @Nonnull TabularSelector selectSingle() {
+        public @Nonnull TabularSelector selectSingle() {
             return build(true);
         }
-        @Nonnull TabularSelector selectList() {
+        public @Nonnull TabularSelector selectList() {
             return build(false);
         }
 
-        @Nonnull TabularSelector build(boolean isSingleResource) {
+        public @Nonnull TabularSelector build(boolean isSingleResource) {
             return new TabularSelector(source, isSingleResource, propertyMap);
         }
     }
