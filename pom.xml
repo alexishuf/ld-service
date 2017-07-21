@@ -76,5 +76,6 @@
     <modules>
         <module>ld-service-core</module>
         <module>ld-service-linkedator</module>
+      <module>ld-service-tabular</module>
     </modules>
 </project>
