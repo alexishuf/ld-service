@@ -12,6 +12,7 @@ import org.apache.jena.reasoner.rulesys.Rule;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -20,18 +21,23 @@ import static org.apache.jena.rdf.model.ResourceFactory.createPlainLiteral;
 public class TabularExplicitMapping implements TabularSemanticMapping {
     private @Nonnull  BiMap<String, Property> map;
     private @Nullable GenericRuleReasoner reasoner;
+    private @Nonnull String uriFormat;
     private final boolean incomplete;
 
     public TabularExplicitMapping(@Nonnull BiMap<String, Property> map,
-                                  @Nullable GenericRuleReasoner reasoner, boolean incomplete) {
+                                  @Nullable GenericRuleReasoner reasoner, @Nonnull String uriFormat,
+                                  boolean incomplete) {
         this.map = map;
         this.reasoner = reasoner;
+        this.uriFormat = uriFormat;
         this.incomplete = incomplete;
     }
 
     @Nonnull
-    public static Builder builder() {
-        return new Builder();
+    public static Builder builder(String uriFormat) {
+        /* try to use the format, which may throw IllegalFormatException */
+        String dummy = String.format(uriFormat, 23);
+        return new Builder(uriFormat);
     }
 
     @Nonnull
@@ -56,7 +62,7 @@ public class TabularExplicitMapping implements TabularSemanticMapping {
         Preconditions.checkArgument(incomplete
                 || row.getColumns().stream().allMatch(map::containsKey));
         Model model = ModelFactory.createDefaultModel();
-        Resource resource = model.createResource();
+        Resource resource = model.createResource(String.format(uriFormat, row.getNumber()));
         for (String column : row.getColumns()) {
             if (map.containsKey(column))
                 resource.addProperty(map.get(column), createPlainLiteral(row.get(column)));
@@ -64,7 +70,7 @@ public class TabularExplicitMapping implements TabularSemanticMapping {
         if (reasoner == null)
             return resource;
         InfModel infModel = ModelFactory.createInfModel(reasoner, model);
-        return infModel.createResource(resource.getId());
+        return infModel.createResource(resource.getURI());
     }
 
     @Override
@@ -96,8 +102,18 @@ public class TabularExplicitMapping implements TabularSemanticMapping {
     public static class Builder {
         private BiMap<String, Property> map = HashBiMap.create();
         private List<Rule> rules = new ArrayList<>();
+        private String uriFormat;
         private boolean incomplete = false;
 
+        public Builder(String uriFormat) {
+            this.uriFormat = uriFormat;
+        }
+
+        @Nonnull
+        public Builder withUriFormat(String uriFormat) {
+            this.uriFormat = uriFormat;
+            return this;
+        }
         @Nonnull
         public Builder map(@Nonnull String columnName, @Nonnull Property property) {
             map.put(columnName, property);
@@ -126,7 +142,7 @@ public class TabularExplicitMapping implements TabularSemanticMapping {
         @Nonnull
         public TabularExplicitMapping build() {
             GenericRuleReasoner reasoner = rules.isEmpty() ? null : new GenericRuleReasoner(rules);
-            return new TabularExplicitMapping(map, reasoner, incomplete);
+            return new TabularExplicitMapping(map, reasoner, uriFormat, incomplete);
         }
     }
 }

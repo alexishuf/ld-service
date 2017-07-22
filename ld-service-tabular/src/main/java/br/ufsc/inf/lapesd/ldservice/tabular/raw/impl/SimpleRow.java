@@ -8,15 +8,23 @@ import java.util.*;
 
 public class SimpleRow implements Row {
     private LinkedHashMap<String, String> values = new LinkedHashMap<>();
+    private int number;
 
-    public SimpleRow(Map<String, String> map) {
+    public SimpleRow(int number, Map<String, String> map) {
+        this.number = number;
         map.forEach((key, value) -> values.put(key, value));
     }
 
-    public SimpleRow(Collection<String> keys, Collection<String> values) {
+    public SimpleRow(int number, Collection<String> keys, Collection<String> values) {
+        this.number = number;
         Preconditions.checkArgument(keys.size() == values.size());
         Iterator<String> keyIt = keys.iterator(), valueIt = values.iterator();
         while (keyIt.hasNext()) this.values.put(keyIt.next(), valueIt.next());
+    }
+
+    @Override
+    public int getNumber() {
+        return number;
     }
 
     @Nonnull

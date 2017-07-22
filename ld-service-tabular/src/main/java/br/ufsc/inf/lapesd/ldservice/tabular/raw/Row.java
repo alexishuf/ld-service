@@ -5,6 +5,11 @@ import java.util.Collection;
 import java.util.Iterator;
 
 public interface Row extends Iterable<String> {
+    /**
+     * Gets the row number, which starts at zero.
+     */
+    int getNumber();
+
     @Nonnull
     Collection<String> getColumns();
     boolean has(@Nonnull String column);

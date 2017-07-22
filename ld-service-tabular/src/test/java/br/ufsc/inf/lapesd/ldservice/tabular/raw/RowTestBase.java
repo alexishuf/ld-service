@@ -1,6 +1,5 @@
 package br.ufsc.inf.lapesd.ldservice.tabular.raw;
 
-import br.ufsc.inf.lapesd.ldservice.tabular.raw.Row;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -36,11 +35,17 @@ public abstract class RowTestBase {
         };
     }
 
-    protected abstract Row createRow(List<String> columns, List<String> values);
+    protected abstract Row createRow(int number, List<String> columns, List<String> values);
+
+    @Test
+    public void testRowHasNumber() {
+        Row row = createRow(23, asList("a", "b"), asList("1", "2"));
+        Assert.assertEquals(row.getNumber(), 23);
+    }
 
     @Test(dataProvider = "columnsData")
     public void testColumns(List<String> columns) {
-        Row row = createRow(columns, IntStream.range(0, columns.size())
+        Row row = createRow(1, columns, IntStream.range(0, columns.size())
                 .mapToObj(String::valueOf).collect(Collectors.toList()));
         Assert.assertEquals(new ArrayList<>(row.getColumns()), columns);
         Assert.assertTrue(columns.stream().allMatch(row::has));
@@ -48,7 +53,7 @@ public abstract class RowTestBase {
 
     @Test(dataProvider = "valuesData")
     public void testValues(List<String> columns, List<String> values) {
-        Row row = createRow(columns, values);
+        Row row = createRow(1, columns, values);
         Assert.assertEquals(columns.size(), values.size());
 
         List<String> actual = columns.stream().map(row::get).collect(Collectors.toList());

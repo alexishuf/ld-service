@@ -7,7 +7,7 @@ import java.util.List;
 
 public class SimpleRowTest extends RowTestBase {
     @Override
-    protected Row createRow(List<String> columns, List<String> values) {
-        return new SimpleRow(columns, values);
+    protected Row createRow(int number, List<String> columns, List<String> values) {
+        return new SimpleRow(number, columns, values);
     }
 }
