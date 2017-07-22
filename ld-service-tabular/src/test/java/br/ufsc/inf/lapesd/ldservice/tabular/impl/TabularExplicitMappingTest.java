@@ -71,6 +71,15 @@ public class TabularExplicitMappingTest {
     }
 
     @Test
+    public void testAllowIncompleteMapping() {
+        TabularExplicitMapping mapping = builder().map("a", a).incomplete().build();
+        Resource resource = mapping.map(new SimpleRow(asList("a", "b"), asList("1", "2")));
+
+        Assert.assertEquals(resource.listProperties().toList().size(), 1);
+        Assert.assertTrue(resource.hasProperty(a, ResourceFactory.createPlainLiteral("1")));
+    }
+
+    @Test
     public void testGetMissingProperty() {
         TabularExplicitMapping m = builder().map("a", a).build();
         Assert.assertThrows(NoSuchElementException.class, () -> m.toProperty("b"));

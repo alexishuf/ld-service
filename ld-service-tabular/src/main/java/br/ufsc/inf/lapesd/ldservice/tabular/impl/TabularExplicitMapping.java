@@ -20,11 +20,13 @@ import static org.apache.jena.rdf.model.ResourceFactory.createPlainLiteral;
 public class TabularExplicitMapping implements TabularSemanticMapping {
     private @Nonnull  BiMap<String, Property> map;
     private @Nullable GenericRuleReasoner reasoner;
+    private final boolean incomplete;
 
     public TabularExplicitMapping(@Nonnull BiMap<String, Property> map,
-                                  @Nullable GenericRuleReasoner reasoner) {
+                                  @Nullable GenericRuleReasoner reasoner, boolean incomplete) {
         this.map = map;
         this.reasoner = reasoner;
+        this.incomplete = incomplete;
     }
 
     @Nonnull
@@ -46,6 +48,23 @@ public class TabularExplicitMapping implements TabularSemanticMapping {
         Property property = map.get(column);
         if (property == null) throw new NoSuchElementException();
         return property;
+    }
+
+    @Nonnull
+    @Override
+    public Resource map(Row row) {
+        Preconditions.checkArgument(incomplete
+                || row.getColumns().stream().allMatch(map::containsKey));
+        Model model = ModelFactory.createDefaultModel();
+        Resource resource = model.createResource();
+        for (String column : row.getColumns()) {
+            if (map.containsKey(column))
+                resource.addProperty(map.get(column), createPlainLiteral(row.get(column)));
+        }
+        if (reasoner == null)
+            return resource;
+        InfModel infModel = ModelFactory.createInfModel(reasoner, model);
+        return infModel.createResource(resource.getId());
     }
 
     @Override
@@ -74,28 +93,24 @@ public class TabularExplicitMapping implements TabularSemanticMapping {
                                     : ", rules=" + reasoner.getRules().toString());
     }
 
-    @Nonnull
-    @Override
-    public Resource map(Row row) {
-        Preconditions.checkArgument(row.getColumns().stream().allMatch(map::containsKey));
-        Model model = ModelFactory.createDefaultModel();
-        Resource resource = model.createResource();
-        for (String column : row.getColumns()) {
-            resource.addProperty(map.get(column), createPlainLiteral(row.get(column)));
-        }
-        if (reasoner == null)
-            return resource;
-        InfModel infModel = ModelFactory.createInfModel(reasoner, model);
-        return infModel.createResource(resource.getId());
-    }
-
     public static class Builder {
         private BiMap<String, Property> map = HashBiMap.create();
         private List<Rule> rules = new ArrayList<>();
+        private boolean incomplete = false;
 
         @Nonnull
         public Builder map(@Nonnull String columnName, @Nonnull Property property) {
             map.put(columnName, property);
+            return this;
+        }
+        @Nonnull
+        public Builder incomplete() {
+            this.incomplete = true;
+            return this;
+        }
+        @Nonnull
+        public Builder complete() {
+            this.incomplete = false;
             return this;
         }
         @Nonnull
@@ -111,7 +126,7 @@ public class TabularExplicitMapping implements TabularSemanticMapping {
         @Nonnull
         public TabularExplicitMapping build() {
             GenericRuleReasoner reasoner = rules.isEmpty() ? null : new GenericRuleReasoner(rules);
-            return new TabularExplicitMapping(map, reasoner);
+            return new TabularExplicitMapping(map, reasoner, incomplete);
         }
     }
 }
