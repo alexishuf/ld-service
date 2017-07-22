@@ -195,6 +195,13 @@ public class LDEndpointTest extends JerseyTestNg.ContainerPerMethodTest {
     }
 
     @Test
+    public void testListWithEndSlash() {
+        Model m = target("/list/a/").request("text/turtle").get(Model.class);
+        List<Resource> list = m.listSubjectsWithProperty(schemaP("mainEntity")).toList();
+        Assert.assertEquals(list.size(), 1);
+    }
+
+    @Test
     public void testListNoCBD() {
         Model m = target("/list/a").request("text/turtle").get(Model.class);
         Set<Resource> members = m.listObjectsOfProperty(schemaP("mainEntity"))

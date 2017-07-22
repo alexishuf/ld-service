@@ -23,6 +23,10 @@ class UriTemplateActivatorImpl implements Activator<String> {
     @Nullable
     @Override
     public Activation<String> tryActivate(@Nonnull String text) {
+        if (uriTemplate.toString().endsWith("/") && !text.endsWith("/"))
+            text = text + "/";
+        if (!uriTemplate.toString().endsWith("/") && text.endsWith("/"))
+            text = text.substring(0, text.length()-1);
         LinkedHashMap<String, String> map = new LinkedHashMap<>();
         return uriTemplate.match(text, map) ? new MapActivation<>(this, map) : null;
     }
