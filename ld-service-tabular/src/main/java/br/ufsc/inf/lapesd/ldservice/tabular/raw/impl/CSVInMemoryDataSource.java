@@ -31,7 +31,7 @@ public class CSVInMemoryDataSource implements TabularDataSource {
         columnsToIndex.forEach(c -> indexes.put(c, HashMultimap.create()));
         try {
             for (CSVRecord r : parser) {
-                ArrayRow row = new ArrayRow((int)r.getRecordNumber(), columnIndex, r.iterator());
+                ArrayRow row = new ArrayRow((int)r.getRecordNumber()-1, columnIndex, r.iterator());
                 rows.add(row);
                 indexes.forEach((col, index) ->
                         index.put(row.get(col), (int)r.getRecordNumber()-1));
