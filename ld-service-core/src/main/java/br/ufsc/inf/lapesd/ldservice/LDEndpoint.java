@@ -103,19 +103,16 @@ public class LDEndpoint {
         newResource.addProperty(schemaP("mainEntity"), newResource);
         out.add(newResource, OWL2.sameAs, resource);
 
-        /* (resource, p, o) => (newResource, p, o) */
-        StmtIterator it = out.listStatements(rwResource, null, (RDFNode) null);
-        while (it.hasNext()) {
-            Statement s = it.next();
-            out.add(newResource, s.getPredicate(), s.getObject());
-            it.remove();
-        }
-        /* (r, p, resource) => (r, p, newResource) */
-        it = out.listStatements(null, null, rwResource);
-        while (it.hasNext()) {
-            Statement s = it.next();
-            out.add(s.getSubject(), s.getPredicate(), newResource);
-            it.remove();
+        List<Statement> victims;
+        if (!newResource.equals(rwResource)) {
+            /* (resource, p, o) => (newResource, p, o) */
+            victims = out.listStatements(rwResource, null, (RDFNode) null).toList();
+            out.remove(victims);
+            victims.forEach(s -> out.add(newResource, s.getPredicate(), s.getObject()));
+            /* (r, p, resource) => (r, p, newResource) */
+            victims = out.listStatements(null, null, rwResource).toList();
+            out.remove(victims);
+            victims.forEach(s -> out.add(s.getSubject(), s.getPredicate(), newResource));
         }
 
         /* this must come after the rwResource => newResource replacement */

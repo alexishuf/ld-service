@@ -4,10 +4,7 @@ import br.ufsc.inf.lapesd.ld_jaxrs.core.traverser.CBDTraverser;
 import br.ufsc.inf.lapesd.ld_jaxrs.jena.JenaProviders;
 import br.ufsc.inf.lapesd.ldservice.model.Mapping;
 import br.ufsc.inf.lapesd.ldservice.model.UriRewrite;
-import br.ufsc.inf.lapesd.ldservice.model.impl.JenaReasoningTransformer;
-import br.ufsc.inf.lapesd.ldservice.model.impl.PathTemplateActivator;
-import br.ufsc.inf.lapesd.ldservice.model.impl.RxActivator;
-import br.ufsc.inf.lapesd.ldservice.model.impl.SPARQLSelector;
+import br.ufsc.inf.lapesd.ldservice.model.impl.*;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.rdf.model.*;
@@ -35,6 +32,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static br.ufsc.inf.lapesd.ldservice.TestUtils.PREFIXES;
 import static br.ufsc.inf.lapesd.ldservice.priv.Utils.schemaP;
 import static org.apache.jena.rdf.model.ResourceFactory.createPlainLiteral;
 import static org.apache.jena.rdf.model.ResourceFactory.createResource;
@@ -57,9 +55,13 @@ public class LDEndpointTest extends JerseyTestNg.ContainerPerMethodTest {
         endpoint.addMapping(new Mapping.Builder()
                 .addRewrite(new UriRewrite(new RxActivator("http://a.example.org/ns#(.*)"), "/a/${1}"))
                 .addRewrite(new UriRewrite(new RxActivator("http://b.example.org/ns#(.*)"), "/b/${1}"))
+                .addSelector(new PathTemplateActivator("a/{localName}"),
+                        new RewriteSelector(model, "http://a.example.org/ns#${localName}"))
+                .addSelector(new PathTemplateActivator("b/{localName}"),
+                        new RewriteSelector(model, "http://b.example.org/ns#${localName}"))
                 .addSelector(new PathTemplateActivator("by_id/a/{id}"),
                         SPARQLSelector.fromModel(model).selectSingle(
-                        TestUtils.PREFIXES +
+                        PREFIXES +
                                 "SELECT ?p WHERE {\n" +
                                 "  ?p foaf:account ?a.\n" +
                                 "  ?a foaf:accountName \"${id}\"." +
@@ -67,7 +69,7 @@ public class LDEndpointTest extends JerseyTestNg.ContainerPerMethodTest {
                                 "}"))
                 .addSelector(new PathTemplateActivator("by_id/b/{id}"),
                         SPARQLSelector.fromModel(model).selectSingle(
-                        TestUtils.PREFIXES +
+                        PREFIXES +
                                 "SELECT ?p WHERE {\n" +
                                 "  ?p foaf:account ?a.\n" +
                                 "  ?a foaf:accountName \"${id}\"." +
@@ -75,14 +77,14 @@ public class LDEndpointTest extends JerseyTestNg.ContainerPerMethodTest {
                                 "}"))
                 .addSelector(new PathTemplateActivator("list/a"),
                         SPARQLSelector.fromModel(model).selectList(
-                        TestUtils.PREFIXES +
+                        PREFIXES +
                                 "SELECT ?p WHERE {\n" +
                                 "  ?p foaf:account ?x.\n" +
                                 "  ?x foaf:accountServiceHomePage <http://a.example.org/>.\n" +
                                 "}"))
                 .addSelector(new PathTemplateActivator("list/b"),
                         SPARQLSelector.fromModel(model).selectList(
-                        TestUtils.PREFIXES +
+                        PREFIXES +
                                 "SELECT ?p WHERE {\n" +
                                 "  ?p foaf:account ?x.\n" +
                                 "  ?x foaf:accountServiceHomePage <http://b.example.org/>.\n" +
@@ -104,6 +106,21 @@ public class LDEndpointTest extends JerseyTestNg.ContainerPerMethodTest {
     @Override
     protected void configureClient(ClientConfig config) {
         JenaProviders.getProviders().forEach(config::register);
+    }
+
+    @Test
+    public void testSelectRewriteSelector() {
+        Model m = target("/a/John").request("text/turtle").get(Model.class);
+        List<Statement> list = m.listStatements(null, schemaP("mainEntity"), (RDFNode) null).toList();
+        Assert.assertEquals(list.size(), 1);
+        Resource john = list.get(0).getResource();
+
+        Assert.assertTrue(QueryExecutionFactory.create(PREFIXES +
+                "ASK WHERE {\n" +
+                "  <" + john.getURI() + "> a foaf:Person;\n" +
+                "    foaf:account ?a.\n" +
+                "  ?a foaf:accountName \"johnny1986\"." +
+                "}", m).execAsk());
     }
 
     @Test
@@ -161,7 +178,7 @@ public class LDEndpointTest extends JerseyTestNg.ContainerPerMethodTest {
         /* default CBD is unbounded */
         Model m;
         m = target("/by_id/a/johnny1986").request("text/turtle").get(Model.class);
-        try (QueryExecution ex = QueryExecutionFactory.create(TestUtils.PREFIXES + "ASK {" +
+        try (QueryExecution ex = QueryExecutionFactory.create(PREFIXES + "ASK {" +
                 "  ?x a foaf:Person.\n" +
                 "  ?x foaf:account ?a.\n" +
                 "  ?a foaf:accountName ?name.\n" +
@@ -172,10 +189,10 @@ public class LDEndpointTest extends JerseyTestNg.ContainerPerMethodTest {
         /* for by_id/b/ CBDTraverser has maxPath = 0 */
         m = target("/by_id/b/bobby").request("text/turtle").get(Model.class);
         try (QueryExecution ex = QueryExecutionFactory.create(
-                TestUtils.PREFIXES + "ASK {?x a foaf:Person.}", m)) {
+                PREFIXES + "ASK {?x a foaf:Person.}", m)) {
             Assert.assertTrue(ex.execAsk());
         }
-        try (QueryExecution ex = QueryExecutionFactory.create(TestUtils.PREFIXES + "ASK {" +
+        try (QueryExecution ex = QueryExecutionFactory.create(PREFIXES + "ASK {" +
                 "  ?x a foaf:Person.\n" +
                 "  ?x foaf:account ?a.\n" +
                 "  ?a foaf:accountName ?name.\n" +
@@ -226,7 +243,7 @@ public class LDEndpointTest extends JerseyTestNg.ContainerPerMethodTest {
     @Test
     public void testListWithCBD() {
         Model m = target("/list/b").request("text/turtle").get(Model.class);
-        try (QueryExecution ex = QueryExecutionFactory.create(TestUtils.PREFIXES + "ASK {\n" +
+        try (QueryExecution ex = QueryExecutionFactory.create(PREFIXES + "ASK {\n" +
                 "  ?p sh:mainEntity ?e.\n" +
                 "  ?e rdf:first ?bob.\n" +
                 "  ?bob foaf:name \"Robert\".\n" +
