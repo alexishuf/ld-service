@@ -13,10 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class CSVInMemoryDataSourceTest {
@@ -25,6 +22,26 @@ public class CSVInMemoryDataSourceTest {
         format = format.withHeader();
         InputStream in = getClass().getResourceAsStream("/tabular-test/" + path);
         return new CSVParser(new InputStreamReader(in, StandardCharsets.UTF_8), format);
+    }
+
+    @Test
+    public void testSelectAll() throws Exception {
+        CSVInMemoryDataSource source = new CSVInMemoryDataSource(
+                resourceCSV("simple.csv", CSVFormat.DEFAULT),
+                Collections.singletonList("col7A"));
+        List<Row> rows = source.select(new HashMap<>());
+        Assert.assertEquals(rows.size(), 7);
+
+        List<String> columns = Arrays.asList("col7A", "col4B", "col3C", "col9D");
+        List<String> valueFormats = Arrays.asList("v%dA", "v%dB", "v%dC", "v%dD");
+        for (int i = 0; i < 7; i++) {
+            final int value = i+1;
+            Row row = rows.get(i);
+            List<String> actual = columns.stream().map(row::get).collect(Collectors.toList());
+            List<String> expected = valueFormats.stream().map(f -> String.format(f, value))
+                    .collect(Collectors.toList());
+            Assert.assertEquals(actual, expected);
+        }
     }
 
     @Test

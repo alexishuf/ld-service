@@ -44,6 +44,10 @@ public class CSVInMemoryDataSource implements TabularDataSource {
     public List<Row> select(@Nonnull Map<String, String> valuesMap) {
         Preconditions.checkArgument(valuesMap.keySet().stream().allMatch(indexes::containsKey));
 
+        /* special case: no filter */
+        if (valuesMap.isEmpty())
+            return rows;
+
         /* sort by number of matches in index */
         TreeMap<Integer, Set<Integer>> indexSizeMap = new TreeMap<>();
         valuesMap.forEach((k, v) -> {
