@@ -32,7 +32,12 @@ public class TabularRDFSource {
 
     public List<Resource> select(Map<Property, String> valuesMap) {
         Map<String, String> columnMap = new HashMap<>();
-        valuesMap.keySet().forEach(k -> columnMap.put(mapping.toColumn(k), valuesMap.get(k)));
+        valuesMap.keySet().forEach(k -> columnMap.put(toColumn(k), valuesMap.get(k)));
         return source.select(columnMap).stream().map(mapping::map).collect(Collectors.toList());
+    }
+
+    @Nonnull
+    private String toColumn(Property k) {
+        return TabularConstants.magicProperties.contains(k) ? k.getURI() : mapping.toColumn(k);
     }
 }

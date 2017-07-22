@@ -53,9 +53,12 @@ public class TabularSelector extends AbstractSelector {
             this.source = source;
         }
 
-        public Builder with(@Nonnull String varName, Property property) {
+        public @Nonnull Builder with(@Nonnull String varName, @Nonnull Property property) {
             propertyMap.put(varName, property);
             return this;
+        }
+        public @Nonnull Builder withRow(@Nonnull String varName) {
+            return with(varName, TabularConstants.row);
         }
 
         public @Nonnull TabularSelector selectSingle() {

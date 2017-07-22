@@ -1,5 +1,6 @@
 package br.ufsc.inf.lapesd.ldservice.tabular.raw.impl;
 
+import br.ufsc.inf.lapesd.ldservice.tabular.TabularConstants;
 import br.ufsc.inf.lapesd.ldservice.tabular.raw.Row;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.csv.CSVFormat;
@@ -108,5 +109,35 @@ public class CSVInMemoryDataSourceTest {
         Assert.assertEquals(row.get("a"), "1");
         Assert.assertEquals(row.get("b"), "2");
         Assert.assertEquals(row.get("c"), "2");
+    }
+
+    @Test
+    public void testSelectByRowOnly() throws IOException {
+        CSVInMemoryDataSource source = new CSVInMemoryDataSource(
+                resourceCSV("simple.csv", CSVFormat.DEFAULT),
+                Arrays.asList("col7A", "col3C"));
+        List<Row> rows = source.select(ImmutableMap.<String, String>builder()
+                .put(TabularConstants.row.getURI(), "0").build());
+        Assert.assertEquals(rows.size(), 1);
+
+        Assert.assertEquals(rows.get(0).get("col7A"), "v1A");
+        Assert.assertEquals(rows.get(0).get("col4B"), "v1B");
+    }
+
+    @Test
+    public void testSelectByRowAndColumn() throws IOException {
+        CSVInMemoryDataSource source = new CSVInMemoryDataSource(
+                resourceCSV("simple.csv", CSVFormat.DEFAULT),
+                Arrays.asList("col7A", "col3C"));
+        List<Row> rows = source.select(ImmutableMap.<String, String>builder()
+                .put(TabularConstants.row.getURI(), "1").put("col7A", "v2A").build());
+        Assert.assertEquals(rows.size(), 1);
+
+        Assert.assertEquals(rows.get(0).get("col7A"), "v2A");
+        Assert.assertEquals(rows.get(0).get("col4B"), "v2B");
+
+        rows = source.select(ImmutableMap.<String, String>builder()
+                .put(TabularConstants.row.getURI(), "1").put("col7A", "v3A").build());
+        Assert.assertEquals(rows.size(), 0);
     }
 }
