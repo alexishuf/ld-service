@@ -23,7 +23,12 @@
     <dependency>
       <groupId>br.ufsc.inf.lapesd</groupId>
       <artifactId>linkedator</artifactId>
-      <version>0.0.3-SNAPSHOT</version>
+      <version>0.0.4-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>br.ufsc.inf.lapesd</groupId>
+      <artifactId>linkedator-jersey</artifactId>
+      <version>0.0.4-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.jena</groupId>
@@ -51,13 +56,13 @@
     <dependency>
       <groupId>org.glassfish.jersey.test-framework</groupId>
       <artifactId>jersey-test-framework-core</artifactId>
-      <version>2.25.1</version>
+      <version>${jersey.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.glassfish.jersey.test-framework.providers</groupId>
       <artifactId>jersey-test-framework-provider-inmemory</artifactId>
-      <version>2.25.1</version>
+      <version>${jersey.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
